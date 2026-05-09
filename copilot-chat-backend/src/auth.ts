@@ -20,7 +20,7 @@ const GITHUB_CLIENT_SECRET = process.env['GITHUB_CLIENT_SECRET'] ?? '';
 const CALLBACK_URL =
   process.env['CALLBACK_URL'] ?? 'http://localhost:3000/auth/github/callback';
 
-authorRouter.get('/github', (_req: Request, res: Response) => {
+authRouter.get('/github', (_req: Request, res: Response) => {
   const params = new URLSearchParams({
     client_id: GITHUB_CLIENT_ID,
     redirect_uri: CALLBACK_URL,
