@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  devtools:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    environment:
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+    networks:
+      - gitlab-net
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    hostname: localhost
+    ports:
+      - "8080:80"
+      - "8443:443"
+      - "2222:22"
+    volumes:
+      - gitlab-config:/etc/gitlab
+      - gitlab-logs:/var/log/gitlab
+      - gitlab-data:/var/opt/gitlab
+      - ../gitlab-config/gitlab.rb:/etc/gitlab/gitlab.rb
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost:8080'
+        gitlab_rails['gitlab_email_enabled'] = false
+        gitlab_rails['initial_root_password'] = '${GITLAB_ROOT_PASSWORD:-GitLab1234!}'
+        gitlab_rails['initial_shared_runners_registration_token'] = 'glrt-demo-token-12345'
+    shm_size: '256m'
+    networks:
+      - gitlab-net
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlab-runner-config:/etc/gitlab-runner
+    depends_on:
+      - gitlab
+    networks:
+      - gitlab-net
+
+  copilot-proxy:
+    build:
+      context: ..
+      dockerfile: copilot-chat-backend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      SESSION_SECRET: ${SESSION_SECRET:-changeme}
+    networks:
+      - gitlab-net
+
+volumes:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
+  gitlab-runner-config:
+
+networks:
+  gitlab-net:
+    driver: bridge

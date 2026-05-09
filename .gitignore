@@ -1,0 +1,24 @@
+# Node
+node_modules/
+dist/
+*.js.map
+
+# .NET
+**/bin/
+**/obj/
+*.user
+
+# Java / Gradle
+**/build/
+.gradle/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,25 @@
+{
+  "name": "GitLab CE + GitHub Copilot Chat",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devtools",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "bash /workspace/scripts/post-create.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "installGradle": "true"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": { "version": "8.0" }
+  },
+  "forwardPorts": [8080, 3000],
+  "portsAttributes": {
+    "8080": { "label": "GitLab CE", "onAutoForward": "notify" },
+    "3000": { "label": "Copilot Proxy", "onAutoForward": "silent" }
+  },
+  "remoteEnv": {
+    "GITHUB_CLIENT_ID": "${localEnv:GITHUB_CLIENT_ID}",
+    "GITHUB_CLIENT_SECRET": "${localEnv:GITHUB_CLIENT_SECRET}"
+  }
+}
