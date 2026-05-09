@@ -1,0 +1,37 @@
+stages:
+  - lint
+  - build
+  - test
+
+default:
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - ~/.nuget/packages
+
+lint:
+  stage: lint
+  script:
+    - dotnet restore
+    - dotnet format --verify-no-changes
+
+build:
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build --no-restore --configuration Release
+  artifacts:
+    paths:
+      - src/DotnetApi/bin/
+    expire_in: 1 hour
+
+test:
+  stage: test
+  script:
+    - dotnet restore
+    - dotnet test --no-restore --logger "junit;LogFilePath=test-results.xml"
+  artifacts:
+    when: always
+    reports:
+      junit: tests/DotnetApi.Tests/test-results.xml
