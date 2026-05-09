@@ -1,0 +1,35 @@
+stages:
+  - lint
+  - build
+  - test
+
+default:
+  image: gradle:8-jdk17
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/
+      - ~/.gradle/caches/
+
+lint:
+  stage: lint
+  script:
+    - gradle checkstyleMain
+
+build:
+  stage: build
+  script:
+    - gradle build -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 hour
+
+test:
+  stage: test
+  script:
+    - gradle test
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/*.xml
